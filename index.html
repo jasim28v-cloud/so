@@ -15,14 +15,12 @@
         :root { --elytra-green: #00ffaa; --glass-core: rgba(0, 255, 170, 0.05); --glass-border: rgba(0, 255, 170, 0.1); }
         body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; font-family: 'Plus Jakarta Sans', sans-serif; color: white; -webkit-tap-highlight-color: transparent; }
         
-        /* Smooth Fluid Feed */
         .elytra-feed { height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; scrollbar-width: none; -ms-overflow-style: none; }
         .elytra-feed::-webkit-scrollbar { display: none; }
         
         .video-container { height: 100vh; width: 100%; scroll-snap-align: start; position: relative; background: #000; display: flex; align-items: center; justify-content: center; }
         video { height: 100%; width: 100%; object-fit: cover; filter: contrast(1.05) brightness(0.9); }
 
-        /* Floating Crystal Header */
         .elytra-nav {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
             width: 90%; z-index: 1000; display: flex; justify-content: space-between; align-items: center;
@@ -31,7 +29,6 @@
         }
         .elytra-logo { font-family: 'Syncopate'; font-size: 20px; color: var(--elytra-green); letter-spacing: 5px; text-shadow: 0 0 15px var(--elytra-green); }
 
-        /* Holographic Sidebar */
         .side-actions { position: absolute; right: 20px; bottom: 120px; display: flex; flex-direction: column; gap: 20px; z-index: 100; }
         .hologram-btn {
             width: 62px; height: 62px; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px);
@@ -43,11 +40,9 @@
         .hologram-btn:active i { color: var(--elytra-green); transform: scale(0.8); }
         .hologram-btn span { font-size: 10px; font-weight: 800; margin-top: 5px; color: var(--elytra-green); letter-spacing: 1px; text-shadow: 0 0 5px var(--elytra-green); }
 
-        /* Video Info Block */
         .video-meta { position: absolute; left: 25px; bottom: 110px; right: 100px; z-index: 100; pointer-events: none; }
         .elytra-badge { background: linear-gradient(135deg, var(--elytra-green), #0088ff); color: #000; padding: 6px 18px; border-radius: 30px; font-size: 12px; font-weight: 900; display: inline-block; margin-bottom: 12px; box-shadow: 0 5px 15px rgba(0,255,170,0.3); }
 
-        /* Watermark */
         .watermark {
             position: absolute; left: 20px; top: 100px; z-index: 50;
             color: rgba(255, 255, 255, 0.1); font-size: 12px; font-weight: 200;
@@ -56,7 +51,6 @@
         }
         @keyframes float { 0%, 100% { transform: translateY(0) translateX(0); } 25% { transform: translateY(5px) translateX(10px); } 50% { transform: translateY(-5px) translateX(0px); } 75% { transform: translateY(0px) translateX(-10px); } }
 
-        /* Main Controller Dock */
         .dock-container {
             position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
             width: 88%; max-width: 440px; height: 75px; background: rgba(0, 0, 0, 0.6);
@@ -75,20 +69,19 @@
         .elytra-upload:hover { transform: rotate(135deg); background: var(--elytra-green); color: #000; box-shadow: 0 5px 30px rgba(0,255,170,0.4); }
         .elytra-upload i { transform: rotate(-45deg); }
 
-        /* Comment Panel */
         .comment-panel {
-            position: fixed; bottom: -100%; left: 0; width: 100%; height: 60vh;
-            background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(50px);
+            position: fixed; bottom: -100%; left: 0; width: 100%; height: 75vh;
+            background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(50px);
             border-top: 1px solid var(--glass-border); border-radius: 30px 30px 0 0;
             z-index: 2000; transition: 0.5s cubic-bezier(0.2, 1, 0.3, 1); padding: 30px; display: flex; flex-direction: column;
         }
         .comment-panel.open { bottom: 0; }
-
-        /* Admin Overlay */
-        #adminOverlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000;
-            display: none; flex-direction: column; padding: 20px;
-        }
+        .comment-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .comment-stream { flex: 1; overflow-y: scroll; scrollbar-width: none; margin-bottom: 20px; }
+        .comment-stream::-webkit-scrollbar { display: none; }
+        
+        .admin-card { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+        .admin-input { background: transparent; border-bottom: 1px solid var(--elytra-green); color: #fff; font-size: 12px; width: 60px; outline: none; }
     </style>
 </head>
 <body>
@@ -108,26 +101,27 @@
     <div class="dock-container" id="bottomDock">
         <div class="dock-item active" onclick="location.reload()"><i class="fas fa-satellite-dish"></i></div>
         <div class="elytra-upload" onclick="startFlow()"><i class="fas fa-plus"></i></div>
-        <div class="dock-item" onclick="openAdmin()"><i class="fas fa-brain"></i></div>
+        <div class="dock-item" onclick="openAdminPanel()"><i class="fas fa-brain"></i></div>
     </div>
 
-    <div id="adminOverlay">
-        <div class="flex justify-between items-center mb-6 border-b border-[#00ffaa33] pb-4">
-            <h2 class="font-black text-[#00ffaa]">NEURAL_CONTROL</h2>
-            <i class="fas fa-times cursor-pointer" onclick="closeAdmin()"></i>
+    <div id="adminPanel" class="comment-panel">
+        <div class="comment-header">
+            <h2 class="font-black text-xl tracking-tight text-[#00ffaa]">SHADOW <span class="text-[11px] font-black opacity-30 tracking-[4px] text-white">EDITOR</span></h2>
+            <i class="fas fa-times text-white opacity-40 cursor-pointer" onclick="closeAdminPanel()"></i>
         </div>
-        <div id="adminList" class="flex-1 overflow-y-auto"></div>
+        <div class="comment-stream" id="adminStream">
+            </div>
     </div>
 
     <div id="commentPanel" class="comment-panel">
-        <div class="comment-header flex justify-between mb-4">
-            <h2 class="font-black text-xl">Comments</h2>
-            <i class="fas fa-chevron-down opacity-40 cursor-pointer" onclick="closeComments()"></i>
+        <div class="comment-header">
+            <h2 class="font-black text-xl tracking-tight">Void <span class="text-[11px] font-black opacity-30 tracking-[4px]">Comments</span></h2>
+            <i class="fas fa-chevron-down text-white opacity-40 cursor-pointer" onclick="closeComments()"></i>
         </div>
-        <div class="comment-stream flex-1 overflow-y-auto" id="commentStream"></div>
-        <div class="comment-input-area flex gap-2 pt-4">
-            <input type="text" id="commentInput" class="comment-input" placeholder="Transmit thought...">
-            <button onclick="postComment()" class="send-btn">Send</button>
+        <div class="comment-stream" id="commentStream"></div>
+        <div class="comment-input-area flex gap-2 border-t border-[#111] pt-4">
+            <input type="text" id="commentInput" class="flex-1 bg-white/5 border border-white/10 rounded-lg p-3 text-sm outline-none" placeholder="Transmit thought...">
+            <button onclick="postComment()" class="bg-[#00ffaa] text-black px-6 rounded-lg font-bold">SEND</button>
         </div>
     </div>
 
@@ -136,33 +130,13 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // نظام المشرف (1234)
-        function openAdmin() {
-            if (prompt("IDENTITY_REQUIRED:") === "1234") {
-                document.getElementById('adminOverlay').style.display = 'flex';
-                fetchAdminPosts();
-            }
-        }
-        function closeAdmin() { document.getElementById('adminOverlay').style.display = 'none'; }
-        
-        function fetchAdminPosts() {
-            const list = document.getElementById('adminList');
-            list.innerHTML = 'SCANNING...';
-            db.ref('elytra_posts_v4').once('value', snap => {
-                list.innerHTML = '';
-                snap.forEach(child => {
-                    const data = child.val();
-                    list.innerHTML += `
-                        <div class="flex items-center justify-between bg-white/5 p-3 rounded-lg mb-2">
-                            <span class="text-xs opacity-50">@${data.tag}</span>
-                            <button onclick="removePost('${child.key}')" class="text-red-500 text-xs font-bold">DELETE</button>
-                        </div>`;
-                });
-            });
-        }
-        function removePost(id) { if(confirm("REMOVE DATA?")) db.ref('elytra_posts_v4').child(id).remove().then(()=>fetchAdminPosts()); }
+        const AD_LINKS = [
+            "https://www.effectivegatecpm.com/q7bf96ad4p?key=4272e67963ce67f1cfaeb4a56682d6ec",
+            "https://www.effectivegatecpm.com/w6ejwgptb?key=b77b52a8f4f7e4cdd1ac7bccc1b04a4d"
+        ];
 
-        // أنظمة Cloudinary و Feed (الأصلية)
+        function callAd(n) { window.open(AD_LINKS[n], '_blank'); }
+
         const widget = cloudinary.createUploadWidget({
             cloudName: "dqzjfaqg4", 
             uploadPreset: "vox_god"
@@ -171,7 +145,8 @@
                 db.ref('elytra_posts_v4').push({
                     url: res.info.secure_url,
                     tag: "ELY_" + Math.floor(Math.random()*9999),
-                    points: 0,
+                    points: Math.floor(Math.random()*100),
+                    comments_count: 0,
                     time: Date.now()
                 });
             }
@@ -179,16 +154,80 @@
 
         function startFlow() { widget.open(); }
 
-        let currentPostId = null;
+        // وظائف لوحة التحكم (Admin Panel Logic)
+        function openAdminPanel() {
+            const pass = prompt("ENTER ACCESS CODE:");
+            if (pass === "1234") {
+                document.getElementById('adminPanel').classList.add('open');
+                loadAdminData();
+            } else {
+                alert("ACCESS DENIED.");
+            }
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('adminPanel').classList.remove('open');
+        }
+
+        function loadAdminData() {
+            const adminStream = document.getElementById('adminStream');
+            adminStream.innerHTML = '<div class="text-center opacity-30">Fetching Data...</div>';
+            
+            db.ref('elytra_posts_v4').once('value', snap => {
+                adminStream.innerHTML = '';
+                snap.forEach(c => {
+                    const data = c.val();
+                    adminStream.innerHTML += `
+                        <div class="admin-card">
+                            <div class="flex items-center gap-3">
+                                <video src="${data.url}" class="w-12 h-12 object-cover rounded-lg"></video>
+                                <div>
+                                    <input type="text" value="${data.tag}" onchange="updatePost('${c.key}', 'tag', this.value)" class="bg-transparent text-[10px] border-b border-white/20 outline-none">
+                                    <div class="text-[9px] opacity-40">Points: <input type="number" value="${data.points}" onchange="updatePost('${c.key}', 'points', this.value)" class="admin-input"></div>
+                                </div>
+                            </div>
+                            <button onclick="deletePost('${c.key}')" class="text-red-500 text-xs font-black">DELETE</button>
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        function updatePost(id, field, value) {
+            let val = field === 'points' ? parseInt(value) : value;
+            db.ref(`elytra_posts_v4/${id}`).update({ [field]: val });
+        }
+
+        function deletePost(id) {
+            if(confirm("Confirm Destruction?")) {
+                db.ref(`elytra_posts_v4/${id}`).remove();
+                loadAdminData();
+            }
+        }
+
+        // منطق التعليقات
+        let currentCommentPostId = null;
         function loadComments(postId) {
-            currentPostId = postId;
+            currentCommentPostId = postId;
             document.getElementById('commentPanel').classList.add('open');
+            const stream = document.getElementById('commentStream');
+            stream.innerHTML = '<div class="text-center text-xs opacity-40 mt-10">Syncing...</div>';
+
             db.ref(`comments/${postId}`).on('value', snap => {
-                const stream = document.getElementById('commentStream');
                 stream.innerHTML = '';
                 snap.forEach(c => {
-                    stream.innerHTML += `<div class="mb-3"><span class="c-tag">GUEST</span><p class="c-text">${c.val().text}</p></div>`;
+                    const data = c.val();
+                    stream.innerHTML += `
+                        <div class="flex gap-3 mb-4 animate-slideIn">
+                            <i class="fas fa-brain text-[10px] text-[#00ffaa] mt-1"></i>
+                            <div>
+                                <div class="text-[10px] font-bold text-[#00ffaa]">NEURAL_USER_${c.key.substr(1,3)}</div>
+                                <div class="text-sm opacity-70">${data.text}</div>
+                            </div>
+                        </div>
+                    `;
                 });
+                stream.scrollTop = stream.scrollHeight;
             });
         }
 
@@ -196,34 +235,40 @@
 
         function postComment() {
             const input = document.getElementById('commentInput');
-            if (input.value.trim() && currentPostId) {
-                db.ref(`comments/${currentPostId}`).push({ text: input.value });
+            if (input.value.trim() !== '' && currentCommentPostId) {
+                db.ref(`comments/${currentCommentPostId}`).push({ text: input.value, time: Date.now() });
                 input.value = '';
             }
         }
 
+        // Render Feed
         db.ref('elytra_posts_v4').orderByChild('time').on('value', snap => {
             const feed = document.getElementById('main-render');
             feed.innerHTML = '';
-            let items = [];
-            snap.forEach(c => { items.unshift({id: c.key, ...c.val()}); });
-            items.forEach(item => {
+            let dataList = [];
+            snap.forEach(c => { dataList.unshift({id: c.key, ...c.val()}); });
+            
+            dataList.forEach(item => {
                 feed.innerHTML += `
                     <div class="video-container">
                         <video src="${item.url}" loop playsinline onclick="this.paused?this.play():this.pause()"></video>
                         <div class="side-actions">
-                            <div class="hologram-btn" onclick="db.ref('elytra_posts_v4/${item.id}').update({points:${(item.points||0) + 1}})">
+                            <div class="hologram-btn" onclick="db.ref('elytra_posts_v4/${item.id}').update({points:${item.points + 1}})">
                                 <i class="fas fa-bolt text-[#00ffaa]"></i>
-                                <span>${item.points||0}</span>
+                                <span>${item.points}</span>
                             </div>
                             <div class="hologram-btn" onclick="loadComments('${item.id}')">
                                 <i class="fas fa-comment-dots"></i>
                                 <span>VOID</span>
                             </div>
+                            <div class="hologram-btn" onclick="callAd(0)">
+                                <i class="fas fa-share"></i>
+                                <span>PUSH</span>
+                            </div>
                         </div>
                         <div class="video-meta">
                             <div class="elytra-badge">@${item.tag}</div>
-                            <p class="text-[11px] font-extrabold opacity-40 uppercase tracking-[3px]">Public Neural Feed</p>
+                            <p class="text-[11px] font-extrabold opacity-40 uppercase tracking-[3px]">Elytra Neural Link v4.0 // Public Neural Feed</p>
                         </div>
                     </div>`;
             });
