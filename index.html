@@ -40,7 +40,21 @@
         }
         .hologram-btn:hover { border-color: var(--elytra-green); transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0, 255, 170, 0.2); }
         .hologram-btn i { font-size: 24px; color: #fff; transition: 0.3s; filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
+        .hologram-btn:active i { color: var(--elytra-green); transform: scale(0.8); }
         .hologram-btn span { font-size: 10px; font-weight: 800; margin-top: 5px; color: var(--elytra-green); letter-spacing: 1px; text-shadow: 0 0 5px var(--elytra-green); }
+
+        /* Video Info Block */
+        .video-meta { position: absolute; left: 25px; bottom: 110px; right: 100px; z-index: 100; pointer-events: none; }
+        .elytra-badge { background: linear-gradient(135deg, var(--elytra-green), #0088ff); color: #000; padding: 6px 18px; border-radius: 30px; font-size: 12px; font-weight: 900; display: inline-block; margin-bottom: 12px; box-shadow: 0 5px 15px rgba(0,255,170,0.3); }
+
+        /* Watermark */
+        .watermark {
+            position: absolute; left: 20px; top: 100px; z-index: 50;
+            color: rgba(255, 255, 255, 0.1); font-size: 12px; font-weight: 200;
+            letter-spacing: 4px; font-family: 'Syncopate'; pointer-events: none;
+            animation: float 10s infinite ease-in-out; text-shadow: 0 0 5px rgba(255,255,255,0.1);
+        }
+        @keyframes float { 0%, 100% { transform: translateY(0) translateX(0); } 25% { transform: translateY(5px) translateX(10px); } 50% { transform: translateY(-5px) translateX(0px); } 75% { transform: translateY(0px) translateX(-10px); } }
 
         /* Main Controller Dock */
         .dock-container {
@@ -56,32 +70,30 @@
             background: #fff; color: #000; width: 58px; height: 58px; border-radius: 22px;
             display: flex; align-items: center; justify-content: center; font-size: 26px;
             cursor: pointer; transition: 0.4s; transform: rotate(45deg);
+            box-shadow: 0 5px 20px rgba(255,255,255,0.1);
         }
+        .elytra-upload:hover { transform: rotate(135deg); background: var(--elytra-green); color: #000; box-shadow: 0 5px 30px rgba(0,255,170,0.4); }
         .elytra-upload i { transform: rotate(-45deg); }
 
-        /* Admin Panel CSS */
-        #adminPanel {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000;
-            display: none; flex-direction: column; padding: 25px; backdrop-filter: blur(20px);
-        }
-        .admin-item { 
-            background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); 
-            padding: 12px; border-radius: 15px; margin-bottom: 10px; display: flex; 
-            justify-content: space-between; align-items: center;
-        }
-
+        /* Comment Panel */
         .comment-panel {
             position: fixed; bottom: -100%; left: 0; width: 100%; height: 60vh;
             background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(50px);
             border-top: 1px solid var(--glass-border); border-radius: 30px 30px 0 0;
-            z-index: 2000; transition: 0.5s; padding: 30px; display: flex; flex-direction: column;
+            z-index: 2000; transition: 0.5s cubic-bezier(0.2, 1, 0.3, 1); padding: 30px; display: flex; flex-direction: column;
         }
         .comment-panel.open { bottom: 0; }
-        .video-meta { position: absolute; left: 25px; bottom: 110px; right: 100px; z-index: 100; pointer-events: none; }
-        .elytra-badge { background: linear-gradient(135deg, var(--elytra-green), #0088ff); color: #000; padding: 6px 18px; border-radius: 30px; font-size: 12px; font-weight: 900; display: inline-block; margin-bottom: 12px; }
+
+        /* Admin Overlay */
+        #adminOverlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000;
+            display: none; flex-direction: column; padding: 20px;
+        }
     </style>
 </head>
 <body>
+
+    <div class="watermark">ELYTRA // Neural Link v4.0</div>
 
     <nav class="elytra-nav" id="topNav">
         <div class="elytra-logo">ELYTRA</div>
@@ -96,26 +108,26 @@
     <div class="dock-container" id="bottomDock">
         <div class="dock-item active" onclick="location.reload()"><i class="fas fa-satellite-dish"></i></div>
         <div class="elytra-upload" onclick="startFlow()"><i class="fas fa-plus"></i></div>
-        <div class="dock-item" onclick="accessAdmin()"><i class="fas fa-brain"></i></div>
+        <div class="dock-item" onclick="openAdmin()"><i class="fas fa-brain"></i></div>
     </div>
 
-    <div id="adminPanel">
-        <div class="flex justify-between items-center border-b border-[#00ffaa33] pb-4 mb-4">
-            <h2 class="font-black text-xl text-[#00ffaa]">CONTROL_UNIT</h2>
-            <i class="fas fa-times text-white cursor-pointer" onclick="closeAdmin()"></i>
+    <div id="adminOverlay">
+        <div class="flex justify-between items-center mb-6 border-b border-[#00ffaa33] pb-4">
+            <h2 class="font-black text-[#00ffaa]">NEURAL_CONTROL</h2>
+            <i class="fas fa-times cursor-pointer" onclick="closeAdmin()"></i>
         </div>
-        <div id="adminList" class="overflow-y-auto flex-1"></div>
+        <div id="adminList" class="flex-1 overflow-y-auto"></div>
     </div>
 
     <div id="commentPanel" class="comment-panel">
-        <div class="comment-header flex justify-between items-center mb-4">
-            <h2 class="font-black text-xl">Void Comments</h2>
+        <div class="comment-header flex justify-between mb-4">
+            <h2 class="font-black text-xl">Comments</h2>
             <i class="fas fa-chevron-down opacity-40 cursor-pointer" onclick="closeComments()"></i>
         </div>
         <div class="comment-stream flex-1 overflow-y-auto" id="commentStream"></div>
-        <div class="flex gap-2 pt-4 border-t border-white/10">
-            <input type="text" id="commentInput" class="flex-1 bg-white/5 border border-white/10 rounded-lg p-3 text-white outline-none" placeholder="Transmit thought...">
-            <button onclick="postComment()" class="bg-[#00ffaa] text-black px-6 rounded-lg font-black uppercase text-xs">Send</button>
+        <div class="comment-input-area flex gap-2 pt-4">
+            <input type="text" id="commentInput" class="comment-input" placeholder="Transmit thought...">
+            <button onclick="postComment()" class="send-btn">Send</button>
         </div>
     </div>
 
@@ -124,43 +136,33 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Admin Logic
-        function accessAdmin() {
-            const pass = prompt("PASSWORD:");
-            if(pass === "1234") {
-                document.getElementById('adminPanel').style.display = 'flex';
-                loadAdminList();
-            } else {
-                alert("WRONG");
+        // نظام المشرف (1234)
+        function openAdmin() {
+            if (prompt("IDENTITY_REQUIRED:") === "1234") {
+                document.getElementById('adminOverlay').style.display = 'flex';
+                fetchAdminPosts();
             }
         }
-
-        function closeAdmin() { document.getElementById('adminPanel').style.display = 'none'; }
-
-        function loadAdminList() {
+        function closeAdmin() { document.getElementById('adminOverlay').style.display = 'none'; }
+        
+        function fetchAdminPosts() {
             const list = document.getElementById('adminList');
-            list.innerHTML = '<div class="text-center p-10 opacity-40">SYNCING...</div>';
+            list.innerHTML = 'SCANNING...';
             db.ref('elytra_posts_v4').once('value', snap => {
                 list.innerHTML = '';
-                snap.forEach(item => {
-                    const data = item.val();
+                snap.forEach(child => {
+                    const data = child.val();
                     list.innerHTML += `
-                        <div class="admin-item">
-                            <video src="${data.url}" class="w-10 h-10 rounded object-cover"></video>
-                            <span class="text-[10px] font-bold opacity-60">@${data.tag}</span>
-                            <button onclick="deleteVideo('${item.key}')" class="bg-red-500 text-white px-3 py-1 rounded text-[10px] font-bold">DELETE</button>
+                        <div class="flex items-center justify-between bg-white/5 p-3 rounded-lg mb-2">
+                            <span class="text-xs opacity-50">@${data.tag}</span>
+                            <button onclick="removePost('${child.key}')" class="text-red-500 text-xs font-bold">DELETE</button>
                         </div>`;
                 });
             });
         }
+        function removePost(id) { if(confirm("REMOVE DATA?")) db.ref('elytra_posts_v4').child(id).remove().then(()=>fetchAdminPosts()); }
 
-        function deleteVideo(id) {
-            if(confirm("DELETE?")) {
-                db.ref(`elytra_posts_v4/${id}`).remove().then(() => loadAdminList());
-            }
-        }
-
-        // Original Cloudinary & Feed Systems
+        // أنظمة Cloudinary و Feed (الأصلية)
         const widget = cloudinary.createUploadWidget({
             cloudName: "dqzjfaqg4", 
             uploadPreset: "vox_god"
@@ -169,7 +171,7 @@
                 db.ref('elytra_posts_v4').push({
                     url: res.info.secure_url,
                     tag: "ELY_" + Math.floor(Math.random()*9999),
-                    points: Math.floor(Math.random()*100),
+                    points: 0,
                     time: Date.now()
                 });
             }
@@ -178,14 +180,14 @@
         function startFlow() { widget.open(); }
 
         let currentPostId = null;
-        function loadComments(id) {
-            currentPostId = id;
+        function loadComments(postId) {
+            currentPostId = postId;
             document.getElementById('commentPanel').classList.add('open');
-            db.ref(`comments/${id}`).on('value', snap => {
+            db.ref(`comments/${postId}`).on('value', snap => {
                 const stream = document.getElementById('commentStream');
                 stream.innerHTML = '';
                 snap.forEach(c => {
-                    stream.innerHTML += `<div class="mb-3"><span class="text-[#00ffaa] text-[10px] font-bold block">GUEST</span><p class="text-xs opacity-70">${c.val().text}</p></div>`;
+                    stream.innerHTML += `<div class="mb-3"><span class="c-tag">GUEST</span><p class="c-text">${c.val().text}</p></div>`;
                 });
             });
         }
@@ -195,7 +197,7 @@
         function postComment() {
             const input = document.getElementById('commentInput');
             if (input.value.trim() && currentPostId) {
-                db.ref(`comments/${currentPostId}`).push({ text: input.value, time: Date.now() });
+                db.ref(`comments/${currentPostId}`).push({ text: input.value });
                 input.value = '';
             }
         }
@@ -203,16 +205,16 @@
         db.ref('elytra_posts_v4').orderByChild('time').on('value', snap => {
             const feed = document.getElementById('main-render');
             feed.innerHTML = '';
-            let dataList = [];
-            snap.forEach(c => { dataList.unshift({id: c.key, ...c.val()}); });
-            dataList.forEach(item => {
+            let items = [];
+            snap.forEach(c => { items.unshift({id: c.key, ...c.val()}); });
+            items.forEach(item => {
                 feed.innerHTML += `
                     <div class="video-container">
                         <video src="${item.url}" loop playsinline onclick="this.paused?this.play():this.pause()"></video>
                         <div class="side-actions">
-                            <div class="hologram-btn" onclick="db.ref('elytra_posts_v4/${item.id}').update({points:${item.points + 1}})">
+                            <div class="hologram-btn" onclick="db.ref('elytra_posts_v4/${item.id}').update({points:${(item.points||0) + 1}})">
                                 <i class="fas fa-bolt text-[#00ffaa]"></i>
-                                <span>${item.points}</span>
+                                <span>${item.points||0}</span>
                             </div>
                             <div class="hologram-btn" onclick="loadComments('${item.id}')">
                                 <i class="fas fa-comment-dots"></i>
@@ -221,7 +223,7 @@
                         </div>
                         <div class="video-meta">
                             <div class="elytra-badge">@${item.tag}</div>
-                            <p class="text-[11px] font-extrabold opacity-40 uppercase">NEURAL LINK ACTIVE</p>
+                            <p class="text-[11px] font-extrabold opacity-40 uppercase tracking-[3px]">Public Neural Feed</p>
                         </div>
                     </div>`;
             });
