@@ -99,7 +99,7 @@
     <div class="elytra-feed" id="main-render"></div>
 
     <div class="dock-container" id="bottomDock">
-        <div class="dock-item active" onclick="location.reload()"><i class="fas fa-satellite-dish"></i></div>
+        <div class="dock-item active" onclick="triggerGlobalChat()"><i class="fas fa-comments-alt"></i></div>
         <div class="elytra-upload" onclick="startFlow()"><i class="fas fa-plus"></i></div>
         <div class="dock-item" onclick="openAdminPanel()"><i class="fas fa-brain"></i></div>
     </div>
@@ -109,8 +109,7 @@
             <h2 class="font-black text-xl tracking-tight text-[#00ffaa]">SHADOW <span class="text-[11px] font-black opacity-30 tracking-[4px] text-white">EDITOR</span></h2>
             <i class="fas fa-times text-white opacity-40 cursor-pointer" onclick="closeAdminPanel()"></i>
         </div>
-        <div class="comment-stream" id="adminStream">
-            </div>
+        <div class="comment-stream" id="adminStream"></div>
     </div>
 
     <div id="commentPanel" class="comment-panel">
@@ -154,7 +153,16 @@
 
         function startFlow() { widget.open(); }
 
-        // وظائف لوحة التحكم (Admin Panel Logic)
+        // وظيفة تفعيل الدردشة من الهوائي الجديد
+        function triggerGlobalChat() {
+            // يفتح تعليقات آخر فيديو تم رفعه كدردشة عامة
+            db.ref('elytra_posts_v4').limitToLast(1).once('value', snap => {
+                snap.forEach(child => {
+                    loadComments(child.key);
+                });
+            });
+        }
+
         function openAdminPanel() {
             const pass = prompt("ENTER ACCESS CODE:");
             if (pass === "1234") {
@@ -205,7 +213,6 @@
             }
         }
 
-        // منطق التعليقات
         let currentCommentPostId = null;
         function loadComments(postId) {
             currentCommentPostId = postId;
@@ -213,6 +220,7 @@
             const stream = document.getElementById('commentStream');
             stream.innerHTML = '<div class="text-center text-xs opacity-40 mt-10">Syncing...</div>';
 
+            db.ref(`comments/${postId}`).off(); // Clear previous listeners
             db.ref(`comments/${postId}`).on('value', snap => {
                 stream.innerHTML = '';
                 snap.forEach(c => {
@@ -241,7 +249,6 @@
             }
         }
 
-        // Render Feed
         db.ref('elytra_posts_v4').orderByChild('time').on('value', snap => {
             const feed = document.getElementById('main-render');
             feed.innerHTML = '';
