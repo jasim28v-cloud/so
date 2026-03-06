@@ -12,89 +12,99 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Plus+Jakarta+Sans:wght@200;400;800&display=swap');
         
-        :root { --elytra-green: #00ffaa; --glass-border: rgba(0, 255, 170, 0.1); }
+        :root { --elytra-green: #00ffaa; --glass-core: rgba(0, 255, 170, 0.05); --glass-border: rgba(0, 255, 170, 0.1); }
         body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; font-family: 'Plus Jakarta Sans', sans-serif; color: white; -webkit-tap-highlight-color: transparent; }
         
-        .elytra-feed { height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; scrollbar-width: none; }
+        .elytra-feed { height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; scrollbar-width: none; -ms-overflow-style: none; }
         .elytra-feed::-webkit-scrollbar { display: none; }
         
         .video-container { height: 100vh; width: 100%; scroll-snap-align: start; position: relative; background: #000; display: flex; align-items: center; justify-content: center; }
-        video { height: 100%; width: 100%; object-fit: cover; }
+        video { height: 100%; width: 100%; object-fit: cover; filter: contrast(1.05) brightness(0.9); }
 
-        /* Floating Sidebar - Centered Vertical */
+        .elytra-nav {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            width: 90%; z-index: 1000; display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 25px; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(20px);
+            border-radius: 20px; border: 1px solid var(--glass-border); transition: 0.3s;
+        }
+        .elytra-logo { font-family: 'Syncopate'; font-size: 20px; color: var(--elytra-green); letter-spacing: 5px; text-shadow: 0 0 15px var(--elytra-green); }
+
+        /* تعديل موقع الأزرار الجانبية إلى المنتصف */
         .side-actions { 
             position: absolute; right: 20px; top: 50%; transform: translateY(-50%); 
             display: flex; flex-direction: column; gap: 25px; z-index: 100; 
         }
         .hologram-btn {
-            width: 55px; height: 55px; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(10px);
+            width: 60px; height: 60px; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(15px);
             border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            border: 1px solid var(--glass-border); cursor: pointer; transition: 0.3s ease;
+            border: 1px solid var(--glass-border); cursor: pointer; transition: 0.4s;
         }
-        .hologram-btn i { font-size: 20px; color: #fff; }
-        .hologram-btn span { font-size: 10px; font-weight: 800; margin-top: 4px; color: var(--elytra-green); }
+        .hologram-btn i { font-size: 22px; color: #fff; }
+        .hologram-btn span { font-size: 10px; font-weight: 800; margin-top: 5px; color: var(--elytra-green); }
 
-        /* Navigation & Dock */
-        .elytra-nav { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); width: 90%; z-index: 1000; display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; background: rgba(0,0,0,0.4); backdrop-filter: blur(15px); border-radius: 20px; border: 1px solid var(--glass-border); }
-        .dock-container { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: 85%; height: 70px; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(30px); border-radius: 35px; border: 1px solid var(--glass-border); display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+        .dock-container {
+            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
+            width: 88%; max-width: 440px; height: 75px; background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(40px); border-radius: 35px; border: 1px solid var(--glass-border);
+            display: flex; justify-content: space-around; align-items: center; z-index: 1000; transition: 0.3s;
+        }
+        .dock-item { color: rgba(255, 255, 255, 0.3); font-size: 24px; cursor: pointer; transition: 0.3s; }
         
-        .elytra-upload { background: #fff; color: #000; width: 50px; height: 50px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 22px; transform: rotate(45deg); }
+        .elytra-upload {
+            background: #fff; color: #000; width: 58px; height: 58px; border-radius: 22px;
+            display: flex; align-items: center; justify-content: center; font-size: 26px;
+            cursor: pointer; transform: rotate(45deg);
+        }
         .elytra-upload i { transform: rotate(-45deg); }
 
-        /* Panels */
-        .panel { position: fixed; bottom: -100%; left: 0; width: 100%; height: 75vh; background: rgba(10, 10, 10, 0.98); backdrop-filter: blur(40px); border-top: 1px solid var(--glass-border); border-radius: 30px 30px 0 0; z-index: 2000; transition: 0.5s cubic-bezier(0.2, 1, 0.3, 1); padding: 25px; display: flex; flex-direction: column; }
-        .panel.open { bottom: 0; }
-        .stream-area { flex: 1; overflow-y: auto; padding-bottom: 20px; }
-        .stream-area::-webkit-scrollbar { display: none; }
-
-        .chat-msg { margin-bottom: 12px; padding: 10px 15px; background: rgba(255,255,255,0.05); border-radius: 15px; border-left: 2px solid var(--elytra-green); max-width: 85%; }
+        .comment-panel {
+            position: fixed; bottom: -100%; left: 0; width: 100%; height: 75vh;
+            background: rgba(10, 10, 10, 0.98); backdrop-filter: blur(50px);
+            border-top: 1px solid var(--glass-border); border-radius: 30px 30px 0 0;
+            z-index: 2000; transition: 0.5s; padding: 25px; display: flex; flex-direction: column;
+        }
+        .comment-panel.open { bottom: 0; }
+        .chat-stream { flex: 1; overflow-y: auto; scrollbar-width: none; }
+        .chat-entry { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; margin-bottom: 10px; border-left: 2px solid var(--elytra-green); }
     </style>
 </head>
 <body>
 
-    <nav class="elytra-nav">
-        <div style="font-family:'Syncopate'; font-size:18px; color:var(--elytra-green);">ELYTRA</div>
-        <div class="flex items-center gap-2"><div class="w-2 h-2 bg-[#00ffaa] rounded-full animate-pulse"></div><span class="text-[10px] opacity-40">LIVE_NODE</span></div>
+    <nav class="elytra-nav" id="topNav">
+        <div class="elytra-logo">ELYTRA</div>
+        <div class="w-2 h-2 bg-[#00ffaa] rounded-full animate-pulse shadow-[0_0_10px_#00ffaa]"></div>
     </nav>
 
     <div class="elytra-feed" id="main-render"></div>
 
-    <div class="dock-container">
-        <div class="text-white/40 text-2xl" onclick="togglePanel('globalChat')"><i class="fas fa-comment-alt"></i></div>
+    <div class="dock-container" id="bottomDock">
+        <div class="dock-item" onclick="openGlobalChat()"><i class="fas fa-comment-dots"></i></div>
         <div class="elytra-upload" onclick="startFlow()"><i class="fas fa-plus"></i></div>
-        <div class="text-white/40 text-2xl" onclick="openAdminPanel()"><i class="fas fa-brain"></i></div>
+        <div class="dock-item" onclick="openAdminPanel()"><i class="fas fa-brain"></i></div>
     </div>
 
-    <div id="globalChat" class="panel">
+    <div id="globalChat" class="comment-panel">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="font-black text-xl text-[#00ffaa]">GLOBAL <span class="text-white opacity-30">CHAT</span></h2>
-            <i class="fas fa-times opacity-40" onclick="togglePanel('globalChat')"></i>
+            <h2 class="font-black text-xl text-[#00ffaa]">GLOBAL <span class="text-white opacity-30">VOID</span></h2>
+            <i class="fas fa-times opacity-40" onclick="closeGlobalChat()"></i>
         </div>
-        <div class="stream-area" id="chatStream"></div>
+        <div class="chat-stream" id="chatStream"></div>
         <div class="flex gap-2 border-t border-white/10 pt-4">
-            <input type="text" id="chatInput" class="flex-1 bg-white/5 border border-white/10 rounded-xl p-4 text-sm outline-none" placeholder="Broadcast message...">
-            <button onclick="sendChatMessage()" class="bg-[#00ffaa] text-black px-6 rounded-xl font-black">SEND</button>
+            <input type="text" id="chatInput" class="flex-1 bg-white/5 border border-white/10 rounded-xl p-4 text-sm outline-none" placeholder="Transmit thought...">
+            <button onclick="sendGlobalMessage()" class="bg-[#00ffaa] text-black px-6 rounded-xl font-black">SEND</button>
         </div>
     </div>
 
-    <div id="commentPanel" class="panel">
+    <div id="commentPanel" class="comment-panel">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="font-black text-xl">VIDEO <span class="opacity-30">VOID</span></h2>
-            <i class="fas fa-times opacity-40" onclick="togglePanel('commentPanel')"></i>
+            <h2 class="font-black text-xl">VOID <span class="opacity-30">COMMENTS</span></h2>
+            <i class="fas fa-chevron-down opacity-40" onclick="closeComments()"></i>
         </div>
-        <div class="stream-area" id="commentStream"></div>
+        <div class="chat-stream" id="commentStream"></div>
         <div class="flex gap-2 border-t border-white/10 pt-4">
             <input type="text" id="commentInput" class="flex-1 bg-white/5 border border-white/10 rounded-xl p-4 text-sm outline-none" placeholder="Add comment...">
             <button onclick="postComment()" class="bg-white text-black px-6 rounded-xl font-black">POST</button>
         </div>
-    </div>
-
-    <div id="adminPanel" class="panel">
-        <div class="flex justify-between items-center mb-6 text-[#00ffaa]">
-            <h2 class="font-black text-xl">CORE <span class="text-white opacity-30">EDITOR</span></h2>
-            <i class="fas fa-times text-white opacity-40" onclick="togglePanel('adminPanel')"></i>
-        </div>
-        <div class="stream-area" id="adminStream"></div>
     </div>
 
     <script>
@@ -102,28 +112,61 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        function togglePanel(id) { document.getElementById(id).classList.toggle('open'); }
-
-        // --- GLOBAL CHAT LOGIC ---
-        function sendChatMessage() {
+        // دردشة عامة
+        function openGlobalChat() { document.getElementById('globalChat').classList.add('open'); }
+        function closeGlobalChat() { document.getElementById('globalChat').classList.remove('open'); }
+        
+        function sendGlobalMessage() {
             const input = document.getElementById('chatInput');
             if(input.value.trim() !== "") {
-                db.ref('global_messages').push({ text: input.value, user: "Ghost_" + Math.floor(Math.random()*999), time: Date.now() });
+                db.ref('global_chat').push({ text: input.value, user: "Ghost_" + Math.floor(Math.random()*999), time: Date.now() });
                 input.value = "";
             }
         }
 
-        db.ref('global_messages').limitToLast(50).on('value', snap => {
-            const chatStream = document.getElementById('chatStream');
-            chatStream.innerHTML = '';
+        db.ref('global_chat').limitToLast(50).on('value', snap => {
+            const stream = document.getElementById('chatStream');
+            stream.innerHTML = '';
             snap.forEach(c => {
                 const d = c.val();
-                chatStream.innerHTML += `<div class="chat-msg"><div class="text-[10px] text-[#00ffaa] font-bold mb-1">${d.user}</div><div class="text-sm opacity-80">${d.text}</div></div>`;
+                stream.innerHTML += `<div class="chat-entry"><div class="text-[10px] text-[#00ffaa] font-bold">@${d.user}</div><div class="text-sm">${d.text}</div></div>`;
             });
-            chatStream.scrollTop = chatStream.scrollHeight;
+            stream.scrollTop = stream.scrollHeight;
         });
 
-        // --- VIDEO FEED LOGIC ---
+        // رفع الفيديوهات
+        const widget = cloudinary.createUploadWidget({ cloudName: "dqzjfaqg4", uploadPreset: "vox_god" }, (err, res) => {
+            if (res.event === "success") {
+                db.ref('elytra_posts_v4').push({ url: res.info.secure_url, tag: "NODE_" + Math.floor(Math.random()*999), points: 0, time: Date.now() });
+            }
+        });
+        function startFlow() { widget.open(); }
+
+        // تعليقات الفيديو
+        let activePostId = null;
+        function openComments(id) { activePostId = id; document.getElementById('commentPanel').classList.add('open'); loadComments(id); }
+        function closeComments() { document.getElementById('commentPanel').classList.remove('open'); }
+        
+        function loadComments(id) {
+            db.ref(`comments/${id}`).on('value', snap => {
+                const stream = document.getElementById('commentStream');
+                stream.innerHTML = '';
+                snap.forEach(c => {
+                    stream.innerHTML += `<div class="chat-entry"><div class="text-sm">${c.val().text}</div></div>`;
+                });
+            });
+        }
+        function postComment() {
+            const input = document.getElementById('commentInput');
+            if(input.value.trim() !== "" && activePostId) {
+                db.ref(`comments/${activePostId}`).push({ text: input.value });
+                input.value = "";
+            }
+        }
+
+        function openAdminPanel() { if(prompt("ACCESS CODE:") === "1234") { alert("Shadow Editor Activated."); } }
+
+        // رندر الفيد
         db.ref('elytra_posts_v4').orderByChild('time').on('value', snap => {
             const feed = document.getElementById('main-render');
             feed.innerHTML = '';
@@ -143,53 +186,17 @@
                                 <span>VOID</span>
                             </div>
                             <div class="hologram-btn">
-                                <i class="fas fa-share-alt"></i>
+                                <i class="fas fa-share"></i>
                                 <span>PUSH</span>
                             </div>
                         </div>
                         <div class="absolute left-6 bottom-28 pointer-events-none">
                             <div class="bg-gradient-to-r from-[#00ffaa] to-[#0088ff] text-black px-4 py-1 rounded-full text-[10px] font-black mb-2 inline-block">@${item.tag}</div>
-                            <p class="text-[10px] uppercase tracking-widest opacity-40">Neural Stream Active // Node_${item.id.substr(0,4)}</p>
+                            <p class="text-[10px] uppercase opacity-30 tracking-[3px]">Elytra Neural Link v4.0</p>
                         </div>
                     </div>`;
             });
         });
-
-        // --- ADMIN & UPLOAD ---
-        function openAdminPanel() { if(prompt("ENTER PASSWORD:") === "1234") { togglePanel('adminPanel'); loadAdminData(); } }
-        function loadAdminData() {
-            const stream = document.getElementById('adminStream');
-            db.ref('elytra_posts_v4').once('value', snap => {
-                stream.innerHTML = '';
-                snap.forEach(c => {
-                    stream.innerHTML += `<div class="flex items-center justify-between bg-white/5 p-4 rounded-xl mb-2">
-                        <span class="text-xs opacity-60">${c.val().tag}</span>
-                        <button onclick="db.ref('elytra_posts_v4/${c.key}').remove()" class="text-red-500 font-bold text-xs">DELETE</button>
-                    </div>`;
-                });
-            });
-        }
-
-        const widget = cloudinary.createUploadWidget({ cloudName: "dqzjfaqg4", uploadPreset: "vox_god" }, (err, res) => {
-            if (res.event === "success") {
-                db.ref('elytra_posts_v4').push({ url: res.info.secure_url, tag: "NODE_" + Math.floor(Math.random()*999), points: 0, time: Date.now() });
-            }
-        });
-        function startFlow() { widget.open(); }
-
-        let currentPost = null;
-        function openComments(id) { currentPost = id; togglePanel('commentPanel'); loadComments(id); }
-        function loadComments(id) {
-            db.ref(`comments/${id}`).on('value', snap => {
-                const s = document.getElementById('commentStream');
-                s.innerHTML = '';
-                snap.forEach(c => { s.innerHTML += `<div class="mb-4 text-sm opacity-70"><span class="text-[#00ffaa] font-bold">NODE:</span> ${c.val().text}</div>`; });
-            });
-        }
-        function postComment() {
-            const i = document.getElementById('commentInput');
-            if(i.value.trim() !== "") { db.ref(`comments/${currentPost}`).push({ text: i.value }); i.value = ""; }
-        }
     </script>
 </body>
 </html>
