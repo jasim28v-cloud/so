@@ -3,203 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ELYTRA | IONIC SUPREMACY v6.0</title>
+    <title>ELYTRA | TOXIC SHADOW v7.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Plus+Jakarta+Sans:wght@300;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Orbitron:wght@400;900&family=Plus+Jakarta+Sans:wght@300;800&display=swap');
         
-        :root { --ionic-green: #00ffaa; --ionic-cyan: #00f2ff; --glass: rgba(255, 255, 255, 0.07); }
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; font-family: 'Plus Jakarta Sans', sans-serif; color: white; -webkit-user-select: none; }
-        
-        .elytra-feed { height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; scrollbar-width: none; -ms-overflow-style: none; }
+        :root { --toxic-green: #39ff14; --shadow-blur: rgba(57, 255, 20, 0.2); --glass: rgba(0, 0, 0, 0.6); }
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; font-family: 'Plus Jakarta Sans', sans-serif; color: white; }
+
+        /* التغذية الرئيسية */
+        .elytra-feed { height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; scrollbar-width: none; }
         .elytra-feed::-webkit-scrollbar { display: none; }
-        
         .video-container { height: 100vh; width: 100%; scroll-snap-align: start; position: relative; background: #000; overflow: hidden; }
-        video { height: 100%; width: 100%; object-fit: cover; transition: 0.5s; }
+        video { height: 100%; width: 100%; object-fit: cover; }
 
-        /* العلامة المائية الأيونية */
-        .watermark-overlay {
-            position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg);
-            font-family: 'Syncopate'; font-size: 3vw; color: rgba(255, 255, 255, 0.1);
-            pointer-events: none; white-space: nowrap; z-index: 5; letter-spacing: 15px;
+        /* العلامة المائية المتحركة */
+        .floating-watermark {
+            position: absolute; top: 20%; left: 10%; font-family: 'Syncopate';
+            font-size: 10px; color: rgba(255, 255, 255, 0.15); pointer-events: none;
+            z-index: 50; letter-spacing: 5px; animation: moveWatermark 20s infinite linear;
         }
+        @keyframes moveWatermark { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(50vw, 20vh); } 50% { transform: translate(20vw, 60vh); } 75% { transform: translate(-10vw, 30vh); } }
 
-        /* الأزرار المركزية - التأثير الأيوني الحديث */
+        /* الأزرار الأيونية في المنتصف */
         .central-actions { 
-            position: absolute; right: 15px; top: 50%; transform: translateY(-50%); 
+            position: absolute; right: 20px; top: 50%; transform: translateY(-50%); 
             display: flex; flex-direction: column; gap: 20px; z-index: 100;
         }
         .ionic-btn {
-            width: 60px; height: 60px; background: var(--glass); backdrop-filter: blur(20px);
-            border-radius: 22px; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            border: 1px solid rgba(0, 255, 170, 0.15); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2);
-            cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            width: 65px; height: 65px; background: var(--glass); backdrop-filter: blur(25px);
+            border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border: 1px solid rgba(57, 255, 20, 0.3); transition: 0.3s;
+            box-shadow: 0 0 15px var(--shadow-blur);
         }
-        .ionic-btn:active { transform: scale(0.85); border-color: var(--ionic-green); }
-        .ionic-btn i { font-size: 22px; margin-bottom: 2px; }
-        .ionic-btn span { font-size: 10px; font-weight: 800; color: var(--ionic-green); text-shadow: 0 0 10px var(--ionic-green); }
+        .ionic-btn i { font-size: 24px; color: #fff; text-shadow: 0 0 10px var(--toxic-green); }
+        .ionic-btn span { font-size: 10px; font-weight: 900; color: var(--toxic-green); margin-top: 5px; }
 
-        /* الوصف المبهر أسفل الفيديو */
-        .ionic-description {
-            position: absolute; bottom: 120px; left: 20px; right: 90px; z-index: 90;
-            padding: 15px; border-radius: 15px; background: linear-gradient(to right, rgba(0,255,170,0.1), transparent);
-            border-left: 3px solid var(--ionic-green); backdrop-filter: blur(5px);
+        /* الساعة والاسم (السم المميز) */
+        .toxic-meta {
+            position: absolute; bottom: 130px; left: 20px; z-index: 100;
+            background: linear-gradient(to right, rgba(0,0,0,0.8), transparent);
+            padding: 15px; border-radius: 10px; border-left: 4px solid var(--toxic-green);
+            box-shadow: -10px 0 20px var(--shadow-blur);
         }
+        .user-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+        .user-tag { font-family: 'Orbitron'; font-weight: 900; color: var(--toxic-green); text-transform: uppercase; letter-spacing: 2px; }
+        .digital-clock { font-family: 'Orbitron'; font-size: 12px; color: #fff; background: rgba(57, 255, 20, 0.2); padding: 2px 8px; border-radius: 5px; border: 1px solid var(--toxic-green); }
 
-        /* شريط التنقل السفلي */
+        /* شريط الرفع */
         .dock-container { 
-            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); 
-            width: 88%; height: 75px; background: rgba(10,10,10,0.85); backdrop-filter: blur(40px);
-            border-radius: 30px; border: 1px solid var(--glass); display: flex; 
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); 
+            width: 85%; height: 75px; background: rgba(0,0,0,0.9); backdrop-filter: blur(30px);
+            border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); display: flex; 
             justify-content: space-around; align-items: center; z-index: 1000;
         }
-        .upload-center { 
-            width: 58px; height: 58px; background: #fff; color: #000; 
-            border-radius: 20px; display: flex; align-items: center; justify-content: center; 
-            font-size: 24px; transform: rotate(45deg); box-shadow: 0 0 25px rgba(255,255,255,0.2);
-        }
-        .upload-center i { transform: rotate(-45deg); }
+        .upload-btn { width: 60px; height: 60px; background: var(--toxic-green); color: #000; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 25px; transform: rotate(45deg); box-shadow: 0 0 20px var(--toxic-green); }
+        .upload-btn i { transform: rotate(-45deg); }
 
-        /* تأثير القلب الأخضر عند النقر المزدوج */
-        .heart-pop { position: absolute; pointer-events: none; color: var(--ionic-green); font-size: 60px; animation: popIn 0.8s ease-out forwards; z-index: 1000; text-shadow: 0 0 30px var(--ionic-green); }
-        @keyframes popIn { 0% { transform: scale(0) rotate(-20deg); opacity: 0; } 50% { opacity: 1; } 100% { transform: scale(2) translateY(-100px) rotate(20deg); opacity: 0; } }
-
-        /* لوحة التعليقات */
-        .comment-panel { position: fixed; bottom: -100%; left: 0; width: 100%; height: 75vh; background: #080808; border-radius: 30px 30px 0 0; z-index: 2000; transition: 0.6s cubic-bezier(0.2, 1, 0.3, 1); padding: 25px; border-top: 1px solid var(--ionic-green); }
-        .comment-panel.open { bottom: 0; }
+        /* قلوب النقر المزدوج */
+        .toxic-pop { position: absolute; pointer-events: none; color: var(--toxic-green); font-size: 50px; animation: toxicPop 0.8s forwards; z-index: 2000; }
+        @keyframes toxicPop { 0% { transform: scale(0); opacity: 0; } 50% { opacity: 1; transform: scale(1.2); } 100% { transform: translateY(-120px) scale(0); opacity: 0; } }
     </style>
 </head>
 <body>
 
-    <div class="elytra-feed" id="main-feed"></div>
+    <div class="elytra-feed" id="feed-engine"></div>
 
     <div class="dock-container">
-        <div onclick="location.reload()"><i class="fas fa-home text-2xl opacity-30"></i></div>
-        <div onclick="openGlobalChat()"><i class="fas fa-comments text-2xl text-[#00ffaa]"></i></div>
-        <div class="upload-center" onclick="startUpload()"><i class="fas fa-plus"></i></div>
-        <div onclick="adminGate()"><i class="fas fa-user-shield text-2xl opacity-30"></i></div>
-    </div>
-
-    <div id="commentBox" class="comment-panel">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="font-black text-xl tracking-tighter text-[#00ffaa]">SHADOW_CHAT</h2>
-            <i class="fas fa-times opacity-50 text-2xl" onclick="closeChat()"></i>
-        </div>
-        <div id="msgStream" class="flex-1 overflow-y-auto mb-4 space-y-4 h-[50vh]"></div>
-        <div class="flex gap-2">
-            <input type="text" id="msgInput" class="flex-1 bg-white/5 p-4 rounded-2xl outline-none border border-white/10" placeholder="Type message...">
-            <button onclick="sendMsg()" class="bg-[#00ffaa] text-black px-8 rounded-2xl font-black">SEND</button>
-        </div>
+        <div onclick="location.reload()"><i class="fas fa-ghost text-2xl opacity-40"></i></div>
+        <div onclick="openChat()"><i class="fas fa-comment-medical text-2xl text-[#39ff14]"></i></div>
+        <div class="upload-btn" onclick="triggerUpload()"><i class="fas fa-plus"></i></div>
+        <div onclick="alert('Access Code Required')"><i class="fas fa-radiation text-2xl opacity-40"></i></div>
     </div>
 
     <script>
-        // تكوين Firebase
-        const fbConfig = { databaseURL: "https://xkom-a73e4-default-rtdb.firebaseio.com/" };
-        firebase.initializeApp(fbConfig);
+        // Firebase Config
+        const config = { databaseURL: "https://xkom-a73e4-default-rtdb.firebaseio.com/" };
+        firebase.initializeApp(config);
         const db = firebase.database();
 
-        // الروابط الإعلانية المطلوبة
-        const AD_1 = "https://www.effectivegatecpm.com/bxwxuk2f39?key=566216691dc8b76a740840e94f68f44c";
-        const AD_2 = "https://www.effectivegatecpm.com/k60w64w4gk?key=564f3d8cc4ac85949f218179b742495e";
+        // Ads Links
+        const AD_L = "https://www.effectivegatecpm.com/bxwxuk2f39?key=566216691dc8b76a740840e94f68f44c";
+        const AD_S = "https://www.effectivegatecpm.com/k60w64w4gk?key=564f3d8cc4ac85949f218179b742495e";
 
-        let currentActivePost = null;
-
-        // معالجة النقر المزدوج (قلب أخضر + إعلان)
-        let tapCounter = 0;
-        function handleInteraction(e, postId, points) {
-            tapCounter++;
-            setTimeout(() => {
-                if (tapCounter === 2) { 
-                    spawnHeart(e);
-                    db.ref(`elytra_posts_v4/${postId}`).update({ points: points + 1 });
-                    window.open(AD_1, '_blank');
-                }
-                tapCounter = 0;
-            }, 300);
+        // Update Digital Clock
+        function getToxicTime() {
+            const now = new Date();
+            return now.getHours().toString().padStart(2, '0') + ":" + 
+                   now.getMinutes().toString().padStart(2, '0') + ":" + 
+                   now.getSeconds().toString().padStart(2, '0');
         }
 
-        function spawnHeart(e) {
-            const h = document.createElement('i');
-            h.className = 'fas fa-bolt heart-pop';
-            h.style.left = (e.clientX || e.touches[0].clientX) - 30 + 'px';
-            h.style.top = (e.clientY || e.touches[0].clientY) - 30 + 'px';
-            document.body.appendChild(h);
-            setTimeout(() => h.remove(), 800);
+        setInterval(() => {
+            document.querySelectorAll('.digital-clock').forEach(el => {
+                el.innerText = getToxicTime();
+            });
+        }, 1000);
+
+        // Double Tap Heart
+        let lastTap = 0;
+        function handleToxicTap(e, id, points) {
+            const now = Date.now();
+            if (now - lastTap < 300) {
+                const h = document.createElement('i');
+                h.className = 'fas fa-biohazard toxic-pop';
+                h.style.left = (e.clientX || e.touches[0].clientX) - 25 + 'px';
+                h.style.top = (e.clientY || e.touches[0].clientY) - 25 + 'px';
+                document.body.appendChild(h);
+                db.ref(`elytra_posts_v4/${id}`).update({ points: points + 1 });
+                window.open(AD_L, '_blank');
+                setTimeout(() => h.remove(), 800);
+            }
+            lastTap = now;
         }
 
-        // جلب البيانات وبناء التغذية
-        db.ref('elytra_posts_v4').orderByChild('time').on('value', snap => {
-            const container = document.getElementById('main-feed');
-            container.innerHTML = '';
-            let list = [];
-            snap.forEach(c => { list.unshift({id: c.key, ...c.val()}); });
+        // Render Feed
+        db.ref('elytra_posts_v4').on('value', snap => {
+            const engine = document.getElementById('feed-engine');
+            engine.innerHTML = '';
+            let data = [];
+            snap.forEach(c => data.unshift({id: c.key, ...c.val()}));
 
-            list.forEach(item => {
-                container.innerHTML += `
-                <div class="video-container" ontouchstart="handleInteraction(event, '${item.id}', ${item.points})">
-                    <div class="watermark-overlay">ELYTRA NEURAL</div>
+            data.forEach(item => {
+                engine.innerHTML += `
+                <div class="video-container" ontouchstart="handleToxicTap(event, '${item.id}', ${item.points})">
+                    <div class="floating-watermark">CONFIDENTIAL // ELYTRA NEURAL LINK</div>
                     <video src="${item.url}" loop playsinline onclick="this.paused?this.play():this.pause()"></video>
                     
                     <div class="central-actions">
-                        <div class="ionic-btn" onclick="window.open('${AD_1}', '_blank')">
-                            <i class="fas fa-heart text-red-500"></i>
+                        <div class="ionic-btn" onclick="window.open('${AD_L}','_blank')">
+                            <i class="fas fa-heart"></i>
                             <span>${item.points}</span>
                         </div>
-                        <div class="ionic-btn" onclick="openGlobalChat('${item.id}')">
-                            <i class="fas fa-comment-dots"></i>
-                            <span>CHAT</span>
+                        <div class="ionic-btn" onclick="openChat()">
+                            <i class="fas fa-skull"></i>
+                            <span>VOID</span>
                         </div>
-                        <div class="ionic-btn" onclick="window.open('${AD_2}', '_blank')">
-                            <i class="fas fa-share-nodes text-[#00f2ff]"></i>
+                        <div class="ionic-btn" onclick="window.open('${AD_S}','_blank')">
+                            <i class="fas fa-radiation"></i>
                             <span>PUSH</span>
                         </div>
                     </div>
 
-                    <div class="ionic-description">
-                        <h3 class="font-black text-[#00ffaa] text-sm tracking-widest uppercase">@${item.tag || 'Shadow_User'}</h3>
-                        <p class="text-[10px] opacity-70 mt-2 leading-relaxed">PROTOCOL_ACTIVE: تم تفعيل الواجهة الأيونية بنجاح. يتم الآن بث البيانات عبر الشبكة العصبية المستقلة. #ElytraSupremacy</p>
+                    <div class="toxic-meta">
+                        <div class="user-row">
+                            <span class="user-tag">@${item.tag || 'Shadow_Agent'}</span>
+                            <span class="digital-clock">${getToxicTime()}</span>
+                        </div>
+                        <p class="text-[10px] text-white/60 font-light italic">STATUS: Broadcast Secure. Neural Link Stable. [DATA_ENCRYPTED]</p>
                     </div>
                 </div>`;
             });
         });
 
-        // وظائف الدردشة
-        function openGlobalChat(id) {
-            currentActivePost = id || "global";
-            document.getElementById('commentBox').classList.add('open');
-            const stream = document.getElementById('msgStream');
-            db.ref(`comments/${currentActivePost}`).on('value', snap => {
-                stream.innerHTML = '';
-                snap.forEach(m => {
-                    stream.innerHTML += `<div class="bg-white/5 p-3 rounded-xl border-l-2 border-[#00ffaa] animate-slideIn"><small class="text-[#00ffaa] block font-bold">USER_${m.key.substr(1,4)}</small>${m.val().text}</div>`;
-                });
-                stream.scrollTop = stream.scrollHeight;
-            });
-        }
-
-        function sendMsg() {
-            const input = document.getElementById('msgInput');
-            if(input.value.trim() && currentActivePost) {
-                db.ref(`comments/${currentActivePost}`).push({ text: input.value, time: Date.now() });
-                input.value = '';
-            }
-        }
-
-        function closeChat() { document.getElementById('commentBox').classList.remove('open'); }
-
-        // وظائف الرفع
+        // Cloudinary
         const widget = cloudinary.createUploadWidget({ cloudName: "dqzjfaqg4", uploadPreset: "vox_god" }, (err, res) => {
             if (res.event === "success") {
-                db.ref('elytra_posts_v4').push({ url: res.info.secure_url, tag: "IONIC_CORE", points: 0, time: Date.now() });
+                db.ref('elytra_posts_v4').push({ url: res.info.secure_url, tag: "SHΔDØW", points: 0, time: Date.now() });
             }
         });
-        function startUpload() { widget.open(); }
-
-        function adminGate() { if(prompt("ACCESS CODE:") === "1234") alert("Admin Mode Unlocked"); }
+        function triggerUpload() { widget.open(); }
+        function openChat() { alert("Neural Chat Syncing..."); }
     </script>
 </body>
 </html>
