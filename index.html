@@ -1,199 +1,178 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ELYTRA | ULTIMATE NEURAL v8.0</title>
+    <title>VOX GOD | ELITE V4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Orbitron:wght@400;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Orbitron:wght@700&display=swap');
+        :root { --p: #ff0055; --glow: 0 0 15px rgba(255, 0, 85, 0.5); }
+        body, html { margin: 0; padding: 0; height: 100%; background: #000; color: #fff; overflow: hidden; font-family: 'Cairo', sans-serif; }
         
-        :root { --neon-green: #39ff14; --glass: rgba(0, 0, 0, 0.75); }
-        body, html { margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; background: #000; font-family: sans-serif; color: white; }
+        /* حاوية الفيديوهات الرئيسية */
+        .feed { height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; scrollbar-width: none; }
+        .feed::-webkit-scrollbar { display: none; }
+        .slide { height: 100vh; width: 100vw; scroll-snap-align: start; position: relative; display: flex; flex-direction: column; }
 
-        /* اسم الموقع الثابت فوق */
-        .fixed-header {
-            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
-            display: flex; justify-content: center; align-items: center;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
-            z-index: 2000; pointer-events: none;
-        }
-        .site-title { font-family: 'Syncopate'; font-size: 22px; color: var(--neon-green); letter-spacing: 8px; text-shadow: 0 0 15px var(--neon-green); }
+        /* منطقة الفيديو */
+        .v-box { position: relative; flex: 1; background: #000; overflow: hidden; }
+        video { width: 100%; height: 100%; object-fit: cover; }
 
-        /* حاوية الفيديوهات المحسنة */
-        .elytra-feed { height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; scrollbar-width: none; }
-        .elytra-feed::-webkit-scrollbar { display: none; }
+        /* أزرار التفاعل على اليسار */
+        .side-btns { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 20px; z-index: 50; }
+        .btn-unit { width: 55px; height: 55px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
+        .btn-unit i { font-size: 1.5rem; filter: drop-shadow(var(--glow)); }
+        .btn-unit span { font-size: 10px; font-family: 'Orbitron'; margin-top: 2px; }
+
+        /* منطقة الدردشة الحية */
+        .chat-zone { height: 35vh; background: linear-gradient(to top, #000, #0a0a0a); border-top: 1px solid rgba(255,0,85,0.3); display: flex; flex-direction: column; }
+        .chat-msgs { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
+        .msg-line { background: rgba(255,255,255,0.04); padding: 8px 12px; border-radius: 12px; font-size: 14px; border-right: 3px solid var(--p); }
         
-        .video-card { height: 100vh; width: 100%; scroll-snap-align: start; position: relative; background: #000; display: flex; align-items: center; justify-content: center; }
-        video { height: 100%; width: 100%; object-fit: cover; }
+        .chat-input-bar { padding: 12px; display: flex; gap: 10px; background: #000; }
+        .chat-input-bar input { flex: 1; background: #111; border: 1px solid #333; padding: 10px 15px; border-radius: 25px; color: #fff; outline: none; }
 
-        /* العلامة المائية الثابتة داخل الفيديو */
-        .video-watermark {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-family: 'Syncopate'; font-size: 2.5rem; color: rgba(255, 255, 255, 0.08);
-            pointer-events: none; z-index: 10; letter-spacing: 12px; white-space: nowrap;
-        }
+        /* لوحة الإدارة */
+        #admin { display: none; position: fixed; inset: 0; z-index: 5000; background: rgba(0,0,0,0.98); padding: 25px; overflow-y: auto; }
+        .grid-v { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .v-thumb { aspect-ratio: 1; border-radius: 15px; overflow: hidden; position: relative; border: 1px solid #222; }
 
-        /* الأزرار المركزية الأيونية */
-        .side-controls { 
-            position: absolute; right: 15px; top: 50%; transform: translateY(-50%); 
-            display: flex; flex-direction: column; gap: 22px; z-index: 100;
-        }
-        .ion-btn {
-            width: 62px; height: 62px; background: var(--glass); backdrop-filter: blur(20px);
-            border-radius: 20px; border: 1px solid rgba(57, 255, 20, 0.3);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: 0.3s; cursor: pointer;
-        }
-        .ion-btn:active { transform: scale(0.9); border-color: #fff; }
-        .ion-btn i { font-size: 22px; color: #fff; text-shadow: 0 0 10px var(--neon-green); }
-        .ion-btn span { font-size: 10px; font-weight: 900; color: var(--neon-green); margin-top: 4px; }
-
-        /* بيانات الفيديو (الاسم + الساعة) */
-        .meta-data {
-            position: absolute; bottom: 110px; left: 20px; z-index: 100;
-            border-left: 3px solid var(--neon-green); padding-left: 15px;
-        }
-        .user-info { display: flex; align-items: center; gap: 10px; font-family: 'Orbitron'; margin-bottom: 5px; }
-        .user-name { color: var(--neon-green); font-weight: 900; font-size: 14px; text-shadow: 0 0 5px var(--neon-green); }
-        .live-clock { font-size: 11px; color: #fff; opacity: 0.8; background: rgba(57, 255, 20, 0.1); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(57, 255, 20, 0.3); }
-
-        /* شريط التحكم السفلي المحسن */
-        .bottom-dock {
-            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
-            width: 90%; height: 75px; background: rgba(0,0,0,0.85); backdrop-filter: blur(40px);
-            border-radius: 35px; border: 1px solid rgba(255,255,255,0.1);
-            display: flex; justify-content: space-around; align-items: center; z-index: 1000;
-        }
-        .upload-trigger {
-            width: 58px; height: 58px; background: #fff; color: #000;
-            border-radius: 20px; display: flex; align-items: center; justify-content: center;
-            font-size: 26px; transform: rotate(45deg); box-shadow: 0 0 20px var(--neon-green);
-        }
-        .upload-trigger i { transform: rotate(-45deg); }
-
-        /* تأثير القلب الأخضر */
-        .green-heart { position: absolute; pointer-events: none; color: var(--neon-green); font-size: 50px; animation: heartOut 0.8s forwards; z-index: 1000; }
-        @keyframes heartOut { 0% { transform: scale(0); opacity: 0; } 50% { opacity: 1; transform: scale(1.3); } 100% { transform: translateY(-150px) scale(0.5); opacity: 0; } }
+        /* شريط التنقل السفلي */
+        .nav-dock { position: fixed; bottom: 0; width: 100%; height: 65px; background: rgba(0,0,0,0.9); display: flex; justify-content: space-around; align-items: center; z-index: 1000; border-top: 1px solid #111; }
+        .up-trigger { width: 55px; height: 45px; background: var(--p); border-radius: 15px; display: flex; align-items: center; justify-content: center; box-shadow: var(--glow); cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <header class="fixed-header">
-        <div class="site-title">ELYTRA</div>
+    <header class="fixed top-0 w-full p-5 z-[100] flex justify-between items-center pointer-events-none">
+        <div class="text-2xl font-black text-pink-600 font-[Orbitron] pointer-events-auto" style="text-shadow: var(--glow)">VOX_GOD</div>
+        <i class="fas fa-terminal text-xl opacity-30 pointer-events-auto" onclick="toggleAdmin()"></i>
     </header>
 
-    <main class="elytra-feed" id="feed-container"></main>
+    <main class="feed" id="main-feed"></main>
 
-    <nav class="bottom-dock">
-        <div onclick="location.reload()"><i class="fas fa-home text-2xl opacity-40"></i></div>
-        <div onclick="openNeuralChat()"><i class="fas fa-comment-dots text-2xl text-[#39ff14]"></i></div>
-        <div class="upload-trigger" onclick="uploadVideo()"><i class="fas fa-plus"></i></div>
-        <div onclick="alert('System Encrypted')"><i class="fas fa-shield-halved text-2xl opacity-40"></i></div>
+    <nav class="nav-dock">
+        <i class="fas fa-home text-xl opacity-50"></i>
+        <div class="up-trigger" id="upload-btn"><i class="fas fa-plus text-white text-xl"></i></div>
+        <i class="fas fa-user-circle text-xl opacity-50" onclick="toggleAdmin()"></i>
     </nav>
 
+    <div id="admin">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-xl font-bold font-[Orbitron]">DATABASE_ROOT</h2>
+            <i class="fas fa-times text-2xl" onclick="toggleAdmin()"></i>
+        </div>
+        <div id="admin-grid" class="grid-v"></div>
+    </div>
+
     <script>
-        // تكوين Firebase
+        // ربط Firebase الجديد الخاص بك
         const firebaseConfig = { databaseURL: "https://xkom-a73e4-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        const myTag = 'USER_' + Math.random().toString(36).substr(2, 4).toUpperCase();
 
-        // الروابط الإعلانية
-        const AD_L = "https://www.effectivegatecpm.com/bxwxuk2f39?key=566216691dc8b76a740840e94f68f44c";
-        const AD_S = "https://www.effectivegatecpm.com/k60w64w4gk?key=564f3d8cc4ac85949f218179b742495e";
+        // روابط الإعلانات
+        const ADS = [
+            "https://www.effectivegatecpm.com/q7bf96ad4p?key=4272e67963ce67f1cfaeb4a56682d6ec",
+            "https://www.effectivegatecpm.com/w6ejwgptb?key=b77b52a8f4f7e4cdd1ac7bccc1b04a4d"
+        ];
 
-        // تحديث الساعة الرقمية
-        function getClock() {
-            const now = new Date();
-            return now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0') + ":" + now.getSeconds().toString().padStart(2,'0');
-        }
-        setInterval(() => {
-            document.querySelectorAll('.live-clock').forEach(el => el.innerText = getClock());
-        }, 1000);
-
-        // النقر المزدوج (القلوب + الإعلانات)
-        let tapTime = 0;
-        function handleInteraction(e, id, points) {
-            const now = Date.now();
-            if (now - tapTime < 300) {
-                spawnHeart(e);
-                db.ref(`elytra_posts_v4/${id}`).update({ points: points + 1 });
-                window.open(AD_L, '_blank');
-            }
-            tapTime = now;
+        function triggerAd() {
+            const randomAd = ADS[Math.floor(Math.random() * ADS.length)];
+            window.open(randomAd, '_blank');
         }
 
-        function spawnHeart(e) {
-            const h = document.createElement('i');
-            h.className = 'fas fa-bolt green-heart';
-            h.style.left = (e.clientX || e.touches[0].clientX) - 25 + 'px';
-            h.style.top = (e.clientY || e.touches[0].clientY) - 25 + 'px';
-            document.body.appendChild(h);
-            setTimeout(() => h.remove(), 800);
-        }
+        // جلب المحتوى
+        db.ref('videos').on('value', (s) => {
+            const feed = document.getElementById('main-feed');
+            const grid = document.getElementById('admin-grid');
+            const data = s.val();
+            if(!data) return;
 
-        // جلب الفيديوهات وعرضها بدقة
-        db.ref('elytra_posts_v4').orderByChild('time').on('value', snap => {
-            const feed = document.getElementById('feed-container');
-            feed.innerHTML = '';
-            let posts = [];
-            snap.forEach(c => posts.unshift({id: c.key, ...c.val()}));
-
-            posts.forEach(post => {
-                feed.innerHTML += `
-                <div class="video-card" ontouchstart="handleInteraction(event, '${post.id}', ${post.points})">
-                    <div class="video-watermark">ELYTRA // NEURAL</div>
-                    <video src="${post.url}" loop playsinline onclick="this.paused?this.play():this.pause()"></video>
-                    
-                    <div class="side-controls">
-                        <div class="ion-btn" onclick="window.open('${AD_L}', '_blank')">
-                            <i class="fas fa-heart"></i>
-                            <span>${post.points}</span>
-                        </div>
-                        <div class="ion-btn" onclick="openNeuralChat()">
-                            <i class="fas fa-comment-dots"></i>
-                            <span>CHAT</span>
-                        </div>
-                        <div class="ion-btn" onclick="window.open('${AD_S}', '_blank')">
-                            <i class="fas fa-share-nodes"></i>
-                            <span>PUSH</span>
+            let h = ''; let g = '';
+            Object.keys(data).reverse().forEach(id => {
+                const v = data[id];
+                h += `
+                <section class="slide">
+                    <div class="v-box">
+                        <video loop playsinline src="${v.url}" onclick="this.paused?this.play():this.pause()"></video>
+                        <div class="side-btns">
+                            <div class="btn-unit" onclick="handleAction('${id}', 'like')"><i class="fas fa-heart text-pink-500"></i><span>${v.likes || 0}</span></div>
+                            <div class="btn-unit" onclick="handleAction('${id}', 'ad')"><i class="fas fa-comment text-cyan-400"></i><span>CHAT</span></div>
+                            <div class="btn-unit" onclick="handleAction('${id}', 'ad')"><i class="fas fa-share text-white"></i><span>SHARE</span></div>
                         </div>
                     </div>
-
-                    <div class="meta-data">
-                        <div class="user-info">
-                            <span class="user-name">@${post.tag || 'Neural_Agent'}</span>
-                            <span class="live-clock">${getClock()}</span>
+                    <div class="chat-zone">
+                        <div class="chat-msgs" id="chat-${id}"></div>
+                        <div class="chat-input-bar">
+                            <input type="text" id="in-${id}" placeholder="اكتب رسالة..." onfocus="triggerAd()">
+                            <button onclick="sendMsg('${id}')" class="text-pink-500"><i class="fas fa-paper-plane"></i></button>
                         </div>
-                        <p class="text-[10px] text-white/50 tracking-widest uppercase">Encryption: AES-256 Enabled // Sector 7</p>
                     </div>
-                </div>`;
+                </section>`;
+                g += `<div class="v-thumb"><video src="${v.url}#t=1" muted></video><div class="absolute top-2 right-2 bg-red-600 p-2 rounded" onclick="del('${id}')"><i class="fas fa-trash text-xs"></i></div></div>`;
             });
+            feed.innerHTML = h;
+            grid.innerHTML = g;
+            initObs();
+            Object.keys(data).forEach(id => listenChat(id));
         });
 
-        // تحسين رفع الفيديوهات (Cloudinary)
-        const widget = cloudinary.createUploadWidget({ 
-            cloudName: "dqzjfaqg4", 
-            uploadPreset: "vox_god",
-            folder: "elytra_uploads", // تحديد المجلد للرفع المنظم
-            clientAllowedFormats: ["mp4", "mov", "webm"]
+        function handleAction(id, type) {
+            triggerAd(); // فتح الإعلان عند أي تفاعل (إعجاب، تعليق، مشاركة)
+            if(type === 'like') db.ref(`videos/${id}/likes`).transaction(c => (c || 0) + 1);
+        }
+
+        function listenChat(id) {
+            db.ref(`chats/${id}`).limitToLast(15).on('value', s => {
+                const box = document.getElementById(`chat-${id}`);
+                if(!box) return;
+                let h = '';
+                s.forEach(m => { h += `<div class="msg-line"><b>${m.val().u}:</b> ${m.val().t}</div>`; });
+                box.innerHTML = h;
+                box.scrollTop = box.scrollHeight;
+            });
+        }
+
+        function sendMsg(id) {
+            const i = document.getElementById(`in-${id}`);
+            if(!i.value.trim()) return;
+            db.ref(`chats/${id}`).push({ u: myTag, t: i.value });
+            i.value = '';
+        }
+
+        // ربط Cloudinary (vox_god)
+        const widget = cloudinary.createUploadWidget({
+            cloudName: "dqzjfaqg4", // سحابتك الجديدة
+            uploadPreset: "bjebvo5p" 
         }, (err, res) => {
-            if (res.event === "success") {
-                db.ref('elytra_posts_v4').push({
-                    url: res.info.secure_url,
-                    tag: "ELY_" + Math.floor(Math.random()*999),
-                    points: 0,
-                    time: Date.now()
-                });
+            if (!err && res.event === "success") {
+                db.ref('videos').push({ url: res.info.secure_url, likes: 0 });
+                alert("تم رفع الفيديو بنجاح إلى vox_god");
             }
         });
 
-        function uploadVideo() { widget.open(); }
-        function openNeuralChat() { alert("Connecting to Neural Network..."); }
+        document.getElementById('upload-btn').onclick = () => widget.open();
+
+        function initObs() {
+            const obs = new IntersectionObserver(es => {
+                es.forEach(e => {
+                    const v = e.target.querySelector('video');
+                    if(e.isIntersecting) v?.play().catch(()=>{});
+                    else v?.pause();
+                });
+            }, { threshold: 0.8 });
+            document.querySelectorAll('.slide').forEach(s => obs.observe(s));
+        }
+
+        function toggleAdmin() { const a = document.getElementById('admin'); a.style.display = a.style.display==='block'?'none':'block'; }
+        function del(id) { if(confirm('حذف؟')) db.ref(`videos/${id}`).remove(); }
     </script>
 </body>
 </html>
